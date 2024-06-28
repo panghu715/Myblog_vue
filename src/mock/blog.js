@@ -13,7 +13,7 @@ Mock.mock("/api/blogtype", "get", {
   ],
 });
 
-Mock.mock(/^\/api\/blog(\?.+)?$/, "get", function(options) {
+Mock.mock(/^\/api\/blog(\?.+)?$/, "get", function (options) {
   const query = qs.parse(options.url);
 
   return Mock.mock({
@@ -33,7 +33,8 @@ Mock.mock(/^\/api\/blog(\?.+)?$/, "get", function(options) {
           "scanNumber|0-3000": 0,
           "commentNumber|0-300": 30,
           "thumb|1": [
-            Mock.Random.image("300x250", "#000", "#fff", "Random Image"),
+            // Mock.Random.image("300x250", "#000", "#fff", "Random Image"),
+            "@image( 300x250, @color, #fff, @ctitle)",
             null,
           ],
           createDate: `@date('T')`,
@@ -292,14 +293,14 @@ Mock.mock("/api/comment", "post", {
   },
 });
 
-Mock.mock(/^\/api\/comment\/?(\?.+)?$/, "get", function(options) {
+Mock.mock(/^\/api\/comment\/?(\?.+)?$/, "get", function (options) {
   const query = qs.parse(options.url);
 
   return Mock.mock({
     code: 0,
     msg: "",
     data: {
-      "total|50-200": 0,
+      "total|52": 0,
       [`rows|${query.limit || 10}`]: [
         {
           id: "@guid",

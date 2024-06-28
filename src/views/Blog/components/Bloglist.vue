@@ -1,26 +1,22 @@
 <template>
-  <div class="blog-list-container" ref="container" v-loading="isLoading">
+  <div class="blog-list-container" ref="mainContainer" v-loading="isLoading">
     <ul>
       <li v-for="item in data.rows" :key="item.id">
         <div class="thumb" v-if="item.thumb">
-          <RouterLink :to="{name:'BlogDetail',params:{id:item.id}}">
-            <img
-              :src="item.thumb"
-              :alt="item.title"
-              :title="item.title"
-            />
+          <RouterLink :to="{ name: 'BlogDetail', params: { id: item.id } }">
+            <img v-lazy="item.thumb" :alt="item.title" :title="item.title" />
           </RouterLink>
         </div>
 
         <div class="main">
-          <RouterLink  :to="{name:'BlogDetail',params:{id:item.id}}">
-            <h2>{{item.title}}</h2>
+          <RouterLink :to="{ name: 'BlogDetail', params: { id: item.id } }">
+            <h2>{{ item.title }}</h2>
           </RouterLink>
           <div class="aside">
-            <span>日期：{{formatDates(item.createDate)}}</span>
-            <span>浏览：{{item.scanNumber}}</span>
-            <span>浏览：{{item.commentNumber}}</span>
-            <span>评论{{item.category.name}}</span>
+            <span>日期：{{ formatDates(item.createDate) }}</span>
+            <span>浏览：{{ item.scanNumber }}</span>
+            <span>浏览：{{ item.commentNumber }}</span>
+            <span>评论{{ item.category.name }}</span>
             <RouterLink
               :to="{
                 name: 'CategoryBlog',
@@ -35,84 +31,81 @@
           <div class="desc">
             {{ item.description }}
           </div>
-          
         </div>
       </li>
     </ul>
     <!-- 分页放到这里 -->
-    <Pager v-if="data.total"
+    <Pager
+      v-if="data.total"
       :current="routeInfo.page"
       :total="data.total"
       :limit="routeInfo.limit"
       :visibleNumber="10"
       @pageChange="handlePageChange"
-     />
-     />
+    />
+    />
   </div>
 </template>
 
 <script>
 import Pager from "@/components/Pager";
 import fetchData from "@/mixins/fetchData.js";
-import {getBlogs} from "@/api/blog.js";
-import {formatDates} from "@/utils"
-import { RouterLink } from "vue-router";
+import { getBlogs } from "@/api/blog.js";
+import { formatDates } from "@/utils";
+import mainScroll from "@/mixins/mainScroll.js";
 export default {
-  mixins:[fetchData({})],
-  components: { 
-    Pager
+  mixins: [fetchData({}), mainScroll("mainContainer")],
+  components: {
+    Pager,
+  },
 
-  },
-  created(){
-   
-  },
-  computed:{
-    routeInfo(){
+  computed: {
+    routeInfo() {
       const categoryId = +this.$route.params.categoryId || -1;
       const page = +this.$route.query.page || 1;
       const limit = +this.$route.query.limit || 10;
-      return {categoryId,page,limit}
-    }
-  },
-  methods:{
-    formatDates,
-    async fetchData(){
-      return await getBlogs(this.routeInfo.page,this.routeInfo.limit,this.routeInfo.categoryId)
+      return { categoryId, page, limit };
     },
-    handlePageChange(newPage){
-      const query = {
-        page:newPage,
-        limit:this.routeInfo.limit
-      }
-    if(this.routeInfo.categoryId===-1){
-      this.$router.push({
-        name:"Blog",
-        query,
-      })
-    }
-    else{
-      this.$router.push({
-        name:"CategoryBlog",
-        query,
-        params:{
-          categoryId:this.routeInfo.categoryId
-        }
-      })
-
-    }
-
-  }
-
   },
- watch:{
-  async $route(){
-    this.isLoading = true;
-    this.$refs.container.scrollTop = 0;
-    this.data=await this.fetchData();
-    this.isLoading = false;
-  }
- }
-}
+  methods: {
+    formatDates,
+    async fetchData() {
+      return await getBlogs(
+        this.routeInfo.page,
+        this.routeInfo.limit,
+        this.routeInfo.categoryId
+      );
+    },
+    handlePageChange(newPage) {
+      const query = {
+        page: newPage,
+        limit: this.routeInfo.limit,
+      };
+      if (this.routeInfo.categoryId === -1) {
+        this.$router.push({
+          name: "Blog",
+          query,
+        });
+      } else {
+        this.$router.push({
+          name: "CategoryBlog",
+          query,
+          params: {
+            categoryId: this.routeInfo.categoryId,
+          },
+        });
+      }
+    },
+  },
+  watch: {
+    async $route() {
+      this.isLoading = true;
+      this.$refs.mainContainer.scrollTop = 0;
+      this.data = await this.fetchData();
+      this.isLoading = false;
+    },
+  },
+};
 </script>
 
 
